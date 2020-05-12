@@ -6,6 +6,7 @@ import store from "./store";
 import "normalize.css";
 import "./assets/css/global.css";
 import "./plugins/element.js";
+import "./assets/iconfont/iconfont.css";
 
 Vue.config.productionTip = false;
 
