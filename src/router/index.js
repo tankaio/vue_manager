@@ -2,8 +2,16 @@ import Vue from "vue";
 import VueRouter from "vue-router";
 import Home from "../views/Home.vue";
 import Login from "../views/Login.vue";
+import Welcome from "../views/Welcome.vue";
 import Users from "../views/user/Users.vue";
 import Roles from "../views/power/Roles.vue";
+import Permission from "../views/power/Permission.vue";
+import Categories from "../views/goods/Categories.vue";
+import Params from "../views/goods/Params.vue";
+import Goods from "../views/goods/Goods.vue";
+import AddGoods from "../views/goods/AddGoods.vue";
+import Orders from "../views/order/Orders.vue";
+import Reports from "../views/reports/Reports.vue";
 
 Vue.use(VueRouter);
 
@@ -12,7 +20,13 @@ const routes = [
     path: "/home",
     name: "Home",
     component: Home,
+    redirect: "/welcome",
     children: [
+      {
+        path: "/welcome",
+        name: "Welcome",
+        component: Welcome
+      },
       {
         path: "/users",
         name: "Users",
@@ -22,6 +36,41 @@ const routes = [
         path: "/roles",
         name: "Roles",
         component: Roles
+      },
+      {
+        path: "/rights",
+        name: "Permission",
+        component: Permission
+      },
+      {
+        path: "/categories",
+        name: "Categories",
+        component: Categories
+      },
+      {
+        path: "/params",
+        name: "Params",
+        component: Params
+      },
+      {
+        path: "/goods",
+        name: "Goods",
+        component: Goods
+      },
+      {
+        path: "/addgoods",
+        name: "AddGoods",
+        component: AddGoods
+      },
+      {
+        path: "/orders",
+        name: "Orders",
+        component: Orders
+      },
+      {
+        path: "/reports",
+        name: "Reports",
+        component: Reports
       }
     ]
   },

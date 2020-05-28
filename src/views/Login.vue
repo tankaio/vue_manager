@@ -29,17 +29,17 @@ export default {
   data() {
     return {
       ruleForm: {
-        username: "admin",
-        password: "123456"
+        username: "",
+        password: ""
       },
       rules: {
         username: [
           { required: true, message: "请输入用户名", trigger: "blur" },
-          { min: 3, max: 8, message: "长度在 3 到 5 个字符", trigger: "blur" }
+          { min: 3, max: 8, message: "长度在 3 到 8 个字符", trigger: "blur" }
         ],
         password: [
           { required: true, message: "请输入密码", trigger: "blur" },
-          { min: 3, max: 15, message: "长度在 3 到 5 个字符", trigger: "blur" }
+          { min: 3, max: 15, message: "长度在 3 到 15 个字符", trigger: "blur" }
         ]
       }
     };
@@ -57,11 +57,11 @@ export default {
         console.log(data);
         let msg = data.meta.msg;
         if (data.meta.status === 200) {
-          this.$message(msg);
+          this.$message.success(msg);
           window.sessionStorage.setItem("token", data.data.token);
           this.$router.push("/home");
         } else {
-          this.$message(msg);
+          this.$message.error(msg);
         }
       });
     }
