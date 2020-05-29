@@ -1,10 +1,12 @@
 <template>
   <div class="roles">
+    <!-- 面包屑导航 -->
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item>权限管理</el-breadcrumb-item>
       <el-breadcrumb-item>角色列表</el-breadcrumb-item>
     </el-breadcrumb>
+    <!-- 卡片布局 -->
     <el-card>
       <el-button type="primary" @click="dialogVisibleOfAdd = true">添加角色</el-button>
       <el-table :data="rolesList" style="width: 100%" border stripe>
@@ -45,6 +47,7 @@
         </el-table-column>
       </el-table>
     </el-card>
+    <!-- 修改角色弹窗 -->
     <el-dialog title="修改角色" :visible.sync="dialogVisibleOfEdit" width="40%" @close="resetFieldsOfEdit">
       <el-card>
         <el-form :model="rolesForm" :rules="rolesFormRules" ref="rolesFormRef" label-width="80px">
@@ -57,6 +60,7 @@
         <el-button type="primary" @click="editRoleConfirm">确 定</el-button>
       </span>
     </el-dialog>
+    <!-- 分配权限弹窗 -->
     <el-dialog title="分配权限" :visible.sync="dialogVisibleOfAssign" width="50%" @close="closeDialogOfAssign">
       <el-tree
         :data="treeData"
@@ -73,7 +77,8 @@
         <el-button type="primary" @click="assignRoleConfirm">确 定</el-button>
       </span>
     </el-dialog>
-    <el-dialog title="提示" :visible.sync="dialogVisibleOfAdd" width="40%" @close="resetFieldsOfAdd">
+    <!-- 添加角色弹窗 -->
+    <el-dialog title="添加角色" :visible.sync="dialogVisibleOfAdd" width="40%" @close="resetFieldsOfAdd">
       <el-card>
         <el-form :model="addRoleForm" :rules="addRoleFormRules" ref="addRoleFormRef" label-width="80px">
           <el-form-item label="角色名称" prop="roleName">
@@ -129,13 +134,15 @@ export default {
     };
   },
   methods: {
+    // 获取角色列表数据
     async getRoles() {
       let { data: res } = await http.getRoles();
       console.log("roles:", res);
       if (res.meta.status !== 200) return this.$message.error(res.meta.msg);
       this.rolesList = res.data;
     },
-    async delRolesRightsById(role, rightId) {
+    // 删除用户权限
+    async closeTag(role, rightId) {
       const confirmTxt = await this.$confirm("此操作将永久删除该项, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
@@ -152,19 +159,15 @@ export default {
         this.$message.success("删除成功!");
       }
     },
-    closeTag(role, rightId) {
-      this.delRolesRightsById(role, rightId);
-    },
-    async queryRoleById(id) {
+    // 打开编辑权限弹窗
+    async editRoles(id) {
+      this.dialogVisibleOfEdit = true;
       let { data: res } = await http.queryRoleById(id);
       console.log("queryRole:", res);
       if (res.meta.status !== 200) return this.$message.error(res.meta.msg);
-      return res.data;
+      this.rolesForm = res.data;
     },
-    async editRoles(id) {
-      this.dialogVisibleOfEdit = true;
-      this.rolesForm = await this.queryRoleById(id);
-    },
+    // 确认修改权限
     async editRoleConfirm() {
       const { data: res } = await http.editRole(this.rolesForm.roleId, this.rolesForm);
       console.log("editRole:", res);
@@ -173,6 +176,7 @@ export default {
       this.dialogVisibleOfEdit = false;
       this.getRoles();
     },
+    // 删除用户
     async delRoles(id) {
       const confirmTxt = await this.$confirm("此操作将永久删除该项, 是否继续?", "提示", {
         confirmButtonText: "确定",
@@ -189,6 +193,7 @@ export default {
         this.getRoles();
       }
     },
+    // 打开分配权限弹窗
     async assignPermission(row) {
       this.curRoleId = row.id;
       this.dialogVisibleOfAssign = true;
@@ -208,6 +213,7 @@ export default {
       }
       return arr;
     },
+    // 确认分配权限
     async assignRoleConfirm() {
       let rolesKeyStr = [...this.$refs.rolesTreeRef.getHalfCheckedKeys(), ...this.$refs.rolesTreeRef.getCheckedKeys()].join(",");
       const { data: res } = await http.roleAuthorization(this.curRoleId, { rids: rolesKeyStr });
@@ -220,6 +226,7 @@ export default {
     closeDialogOfAssign() {
       this.defaultExpandKeyArr = [];
     },
+    //确认添加角色
     async addRoleConfirm() {
       const { data: res } = await http.addRole(this.addRoleForm);
       console.log("addRole:", res);

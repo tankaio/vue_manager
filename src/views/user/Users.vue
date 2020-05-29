@@ -1,21 +1,26 @@
 <template>
   <div class="users">
+    <!-- 面包屑导航 -->
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item>用户管理</el-breadcrumb-item>
       <el-breadcrumb-item>用户列表</el-breadcrumb-item>
     </el-breadcrumb>
+    <!-- 卡片布局 -->
     <el-card class="box-card">
       <el-row :gutter="20">
+        <!-- 搜索框 -->
         <el-col :span="8">
-          <el-input placeholder="请输入内容" v-model="queryInfo.query" clearable>
+          <el-input placeholder="请输入内容" v-model="queryInfo.query" clearable @keyup.enter.native="searchUser">
             <el-button slot="append" icon="el-icon-search" @click="searchUser"></el-button>
           </el-input>
         </el-col>
+        <!-- 添加用户按钮 -->
         <el-col :span="4">
           <el-button type="primary" @click="dialogVisibleOfAdd = true">添加用户</el-button>
         </el-col>
       </el-row>
+      <!-- table表单 -->
       <el-table :data="userList" border class="table-wrap">
         <el-table-column type="index" label="#"></el-table-column>
         <el-table-column prop="username" label="姓名" width="180"> </el-table-column>
@@ -43,6 +48,7 @@
           </template>
         </el-table-column>
       </el-table>
+      <!-- 分页 -->
       <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
@@ -55,6 +61,7 @@
       >
       </el-pagination>
     </el-card>
+    <!-- 添加用户弹窗 -->
     <el-dialog title="添加用户" :visible.sync="dialogVisibleOfAdd" width="40%" @closed="dialogCloseOfAdd">
       <el-card class="box-card">
         <el-form :model="addUserForm" :rules="addUserFormRules" ref="addUserForm" label-width="80px">
@@ -77,6 +84,7 @@
         <el-button type="primary" @click="confirmAddUser">确 定</el-button>
       </span>
     </el-dialog>
+    <!-- 修改用户信息弹窗 -->
     <el-dialog title="修改用户信息" :visible.sync="dialogVisibleOfChange" width="40%" @closed="dialogCloseOfChange">
       <el-card>
         <el-form :model="changeUserForm" :rules="changeUserFormRules" ref="changeUserForm" label-width="80px">
@@ -92,6 +100,7 @@
         <el-button type="primary" @click="confirmChangeUser">确 定</el-button>
       </span>
     </el-dialog>
+    <!-- 分配角色弹窗 -->
     <el-dialog title="分配角色" :visible.sync="dialogVisibleOfAssignRole" width="40%" @close="dialogCloseOfAssignRole">
       <el-card>
         <p>当前用户：{{ curUser.username }}</p>
@@ -113,12 +122,14 @@ import http from "@/api/request";
 export default {
   name: "Users",
   data() {
+    // 自定义邮箱正则验证
     let emailValid = (rule, value, callback) => {
       const reg = /^\w+((.\w+)|(-\w+))@[A-Za-z0-9]+((.|-)[A-Za-z0-9]+).[A-Za-z0-9]+$/;
       if (!value) return callback(new Error("请输入邮箱"));
       if (!reg.test(value)) return callback(new Error("邮箱格式不正确"));
       callback();
     };
+    // 自定义手机号码正则验证
     let phoneNumValid = (rule, value, callback) => {
       const reg = /^1[3456789]\d{9}$/;
       if (!value) return callback(new Error("请输入手机号码"));
@@ -166,6 +177,7 @@ export default {
     };
   },
   methods: {
+    // 获取后台用户列表数据
     async getUserList() {
       let { data: res } = await http.getUserList(this.queryInfo);
       console.log(res);
@@ -174,68 +186,65 @@ export default {
       this.userTotal = res.data.total;
       if (this.queryInfo.query) this.queryInfo.query = "";
     },
-    editClick(row, column, index) {
-      console.log("row:", row);
-      console.log("column:", column);
-      console.log("index:", index);
-    },
+    // 分页组件分页数（pagesize）改变事件
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`);
       this.queryInfo.pagesize = val;
       this.getUserList();
     },
+    // 分页组件当前页（pagenum）改变事件
     handleCurrentChange(val) {
       console.log(`当前页: ${val}`);
       this.queryInfo.pagenum = val;
       this.getUserList();
     },
+    //查询用户
     searchUser() {
       this.queryInfo.pagenum !== 1 && (this.queryInfo.pagenum = 1);
       this.getUserList();
     },
+    // 添加用户弹窗关闭事件
     dialogCloseOfAdd() {
       this.dialogVisibleOfAdd = false;
       this.$refs.addUserForm.resetFields();
     },
+    //确认添加用户
     confirmAddUser() {
       console.log("addF:", this.addUserForm);
-      this.$refs.addUserForm.validate(vali => {
+      this.$refs.addUserForm.validate(async vali => {
         if (!vali) return;
-        this.addUser();
+        let { data: res } = await http.addUser(this.addUserForm);
+        console.log("add:", res);
+        if (res.meta.status !== 201) return this.$message.error(res.meta.msg);
+        this.$message.success("添加用户成功!");
+        this.dialogVisibleOfAdd = false;
+        this.getUserList();
       });
     },
-    async addUser() {
-      let { data: res } = await http.addUser(this.addUserForm);
-      console.log("add:", res);
-      if (res.meta.status !== 201) return this.$message.error(res.meta.msg);
-      this.$message.success("添加用户成功!");
-      this.dialogVisibleOfAdd = false;
-      this.getUserList();
-    },
+    // 改变用户状态
     async switchChange(newState, id) {
       let { data: res } = await http.changeState(id, newState);
       console.log("switchChange:", res);
       if (res.meta.status !== 200) return this.$message.error(res.meta.msg);
       this.$message.success(res.meta.msg);
     },
+    //修改用户弹窗关闭事件
     dialogCloseOfChange() {
       this.dialogVisibleOfChange = false;
       this.$refs.changeUserForm.resetFields();
     },
-    async queryUserById(id) {
+    //查询用户
+    async changeUserClick(id) {
+      this.dialogVisibleOfChange = true;
       let { data: res } = await http.queryUserById(id);
       console.log("currentUser:", res);
       if (res.meta.status !== 200) return this.$message.error(res.meta.msg);
       this.changeUserForm = res.data;
     },
-    changeUserClick(id) {
-      this.dialogVisibleOfChange = true;
-      this.queryUserById(id);
-    },
+    // 确认添加用户
     confirmChangeUser() {
       this.$refs.changeUserForm.validate(async valid => {
         if (!valid) return;
-        console.log("ss:", this.changeUserForm);
         let { data: res } = await http.changeUserInfo(+this.changeUserForm.id, {
           email: this.changeUserForm.email,
           mobile: this.changeUserForm.mobile
@@ -247,6 +256,7 @@ export default {
         this.$message.success("修改用户信息成功");
       });
     },
+    // 删除用户
     async delUserClick(id) {
       const confirmTxt = await this.$confirm("此操作将永久删除该项, 是否继续?", "提示", {
         confirmButtonText: "确定",
@@ -263,6 +273,7 @@ export default {
         this.$message.success("删除用户成功");
       }
     },
+    // 打开分配角色弹出
     async dialogAssignRole(row) {
       console.log("cur:", row);
       this.dialogVisibleOfAssignRole = true;
@@ -270,6 +281,7 @@ export default {
       this.selectOptions = res.data;
       this.curUser = row;
     },
+    // 确认分配角色权限
     async confirmAssignRole() {
       if (!this.selId) {
         return this.$message({
@@ -290,6 +302,7 @@ export default {
       this.dialogVisibleOfAssignRole = false;
       this.getUserList();
     },
+    // 分配角色权限弹窗关闭
     dialogCloseOfAssignRole() {
       this.selId = "";
     }

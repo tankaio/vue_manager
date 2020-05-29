@@ -1,11 +1,13 @@
 <template>
   <div class="addgoods">
+    <!-- 面包屑导航 -->
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item>商品管理</el-breadcrumb-item>
       <el-breadcrumb-item :to="{ path: '/goods' }">商品列表</el-breadcrumb-item>
       <el-breadcrumb-item>添加商品</el-breadcrumb-item>
     </el-breadcrumb>
+    <!-- 卡片布局 -->
     <el-card>
       <el-alert title="添加商品信息" type="info" center show-icon> </el-alert>
       <el-steps :space="200" :active="+activeIndex" finish-status="success">
@@ -18,6 +20,7 @@
       </el-steps>
       <el-form :model="addGoodsForm" :rules="addGoodsFormRules" ref="addGoodsFormRef" label-width="100px">
         <el-tabs v-model="activeIndex" tab-position="left" stretch @tab-click="tabClick" :before-leave="beforeTabLeave">
+          <!-- 添加基本信息面板 -->
           <el-tab-pane label="基本信息" name="0">
             <el-form-item label="商品名称" prop="goods_name">
               <el-input v-model="addGoodsForm.goods_name"></el-input>
@@ -35,6 +38,7 @@
               <el-cascader v-model="addGoodsForm.goods_cat" :options="cascaderData" :props="props" @change="cascaderChange" clearable></el-cascader>
             </el-form-item>
           </el-tab-pane>
+          <!-- 添加商品参数面板 -->
           <el-tab-pane label="商品参数" name="1" class="ml-25">
             <div v-for="item in manyList" :key="item.attr_id">
               <h5>{{ item.attr_vals.length === 0 ? "" : item.attr_name }}</h5>
@@ -43,6 +47,7 @@
               </el-checkbox-group>
             </div>
           </el-tab-pane>
+          <!-- 添加商品属性面板 -->
           <el-tab-pane label="商品属性" name="2" class="ml-25">
             <div v-for="item in onlyList" :key="item.attr_id">
               <h5>{{ item.attr_name }}</h5>
@@ -51,6 +56,7 @@
               </el-checkbox-group>
             </div>
           </el-tab-pane>
+          <!-- 上传商品图片面板 -->
           <el-tab-pane label="商品图片" name="3" class="ml-25">
             <el-upload
               action="http://127.0.0.1:8888/api/private/v1/upload"
@@ -63,6 +69,7 @@
               <el-button size="small" type="primary">点击上传</el-button>
             </el-upload>
           </el-tab-pane>
+          <!-- 添加商品内容面板 -->
           <el-tab-pane label="商品内容" name="4" class="ml-25">
             <quill-editor v-model="addGoodsForm.goods_introduce" />
             <el-button type="primary" class="confirm-btn" @click="confirmAddGoods">确认添加</el-button>
@@ -70,6 +77,7 @@
         </el-tabs>
       </el-form>
     </el-card>
+    <!-- 图片预览弹窗 -->
     <el-dialog title="图片预览" :visible.sync="imgDialogVisible" width="40%">
       <img :src="imgPreviewUrl" />
       <span slot="footer" class="dialog-footer">
@@ -116,14 +124,17 @@ export default {
     };
   },
   computed: {
+    // 判断是否选中了三级分类
     cascaderIsThree() {
       return this.addGoodsForm.goods_cat.length === 3;
     },
+    // 第三级分类id
     cascaderLastKey() {
       return this.addGoodsForm.goods_cat[2];
     }
   },
   methods: {
+    // 获取参数数据列表
     async getParamsList(sel) {
       const { data: res } = await http.getParamsList(this.cascaderLastKey, sel);
       console.log("getParamsList:", res);
@@ -137,12 +148,14 @@ export default {
         this.onlyList = res.data;
       }
     },
+    // 获取商品类型数据
     async getGoodsTypeList() {
       const { data: res } = await http.getGoodsTypeList();
       console.log("getGoodsTypeList:", res);
       if (res.meta.status !== 200) return this.$message.error(res.meta.msg);
       this.cascaderData = res.data;
     },
+    // 离开tab前的钩子
     beforeTabLeave(activeName, oldActiveName) {
       console.log("activeName:", activeName);
       console.log("oldActiveName:", oldActiveName);
@@ -156,6 +169,7 @@ export default {
         }
       }
     },
+    // tab点击事件
     tabClick(tab) {
       console.log(tab.label);
       if (tab.label === "商品参数") {
@@ -165,13 +179,13 @@ export default {
         this.getParamsList("only");
       }
     },
-    cascaderChange(val) {
-      console.log("选中节点的值:", val);
-      console.log("cascaderValue:", this.addGoodsForm.goods_cat);
-    },
-    cbChange(val) {
-      console.log(val);
-    },
+    // cascaderChange(val) {
+    //   console.log("选中节点的值:", val);
+    //   console.log("cascaderValue:", this.addGoodsForm.goods_cat);
+    // },
+    // cbChange(val) {
+    //   console.log(val);
+    // },
     imgUploadSuccess(res) {
       console.log("imgUploadRes:", res);
       if (res.meta.status !== 200) return this.$message.error(res.meta.msg);
@@ -188,6 +202,7 @@ export default {
       const index = this.addGoodsForm.pics.findIndex(item => item.pic === filePath);
       this.addGoodsForm.pics.splice(index, 1);
     },
+    // 确认添加商品
     async confirmAddGoods() {
       let formData = _.cloneDeep(this.addGoodsForm);
       formData.goods_cat = formData.goods_cat.join(",");

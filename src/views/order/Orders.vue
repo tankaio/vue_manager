@@ -1,10 +1,12 @@
 <template>
   <div class="orders">
+    <!-- 面包屑导航 -->
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item>订单管理</el-breadcrumb-item>
       <el-breadcrumb-item>订单列表</el-breadcrumb-item>
     </el-breadcrumb>
+    <!-- 卡片布局 -->
     <el-card>
       <!-- <el-row>
         <el-col :span="10" class="card-top">
@@ -35,6 +37,7 @@
           </template>
         </el-table-column>
       </el-table>
+      <!-- 分页 -->
       <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
@@ -47,6 +50,7 @@
       >
       </el-pagination>
     </el-card>
+    <!-- 弹窗 -->
     <el-dialog title="修改订单信息" :visible.sync="editDialogVisible" width="40%">
       <el-form :model="editForm" ref="editFormRef" label-width="80px">
         <el-form-item label="订单编号">
@@ -93,6 +97,7 @@ export default {
     };
   },
   methods: {
+    // 获取订单数据
     async getOrdersList() {
       const { data: res } = await http.getOrdersList(this.orderForm);
       console.log("getOrdersList:", res);
@@ -108,6 +113,7 @@ export default {
       this.orderForm.pagenum = val;
       this.getOrdersList();
     },
+    // 编辑框弹出
     editDialogClick(row) {
       this.editDialogVisible = true;
       let newRow = _.cloneDeep(row);
@@ -115,6 +121,7 @@ export default {
       this.editForm.order_pay = this.editForm.order_pay === "0" ? "未付款" : "已付款";
       this.editForm.create_time = ymdAndHms(this.editForm.create_time);
     },
+    // 确认修改
     async confirmEdit() {
       this.editDialogVisible = false;
       this.editForm.order_pay = this.editForm.order_pay === "未付款" ? "0" : "1";

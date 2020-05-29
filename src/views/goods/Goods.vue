@@ -1,10 +1,12 @@
 <template>
   <div class="goods">
+    <!-- 面包屑导航 -->
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item>商品管理</el-breadcrumb-item>
       <el-breadcrumb-item>商品列表</el-breadcrumb-item>
     </el-breadcrumb>
+    <!-- 卡片布局 -->
     <el-card>
       <el-row>
         <el-col :span="10" class="card-top">
@@ -44,6 +46,7 @@
       >
       </el-pagination>
     </el-card>
+    <!-- 弹窗 -->
     <el-dialog title="修改信息" :visible.sync="editDialogVisible" width="40%" @close="editDialogClose">
       <el-card>
         <el-form :model="editForm" :rules="editFormRules" ref="editFormRef" label-width="80px">
@@ -93,6 +96,7 @@ export default {
     };
   },
   methods: {
+    // 获取后台商品数据
     async getGoodList() {
       const { data: res } = await http.getGoodList(this.goodParams);
       console.log("getGoodList:", res);
@@ -110,6 +114,7 @@ export default {
       this.goodParams.pagenum = val;
       this.getGoodList();
     },
+    // 删除商品
     async removeGood(id) {
       const confirmTxt = await this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
         confirmButtonText: "确定",
@@ -126,6 +131,7 @@ export default {
         this.getGoodList();
       }
     },
+    // 显示编辑商品弹窗
     async showEditDialog(id) {
       this.editDialogVisible = true;
       const { data: res } = await http.queryGoodById(id);
@@ -133,6 +139,7 @@ export default {
       if (res.meta.status !== 200) return this.$message.error(res.meta.msg);
       this.editForm = res.data;
     },
+    // 编辑商品确认
     async confirmEditDialog() {
       const { data: res } = await http.editGood(this.editForm.goods_id, this.editForm);
       console.log("editGood:", res);
@@ -144,6 +151,7 @@ export default {
     editDialogClose() {
       this.$refs.editFormRef.resetFields();
     },
+    // 搜索商品
     async searchClick() {
       await this.getGoodList();
       this.goodParams.query = "";

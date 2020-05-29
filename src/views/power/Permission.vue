@@ -1,10 +1,12 @@
 <template>
   <div class="permission">
+    <!-- 面包屑导航 -->
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item>权限管理</el-breadcrumb-item>
       <el-breadcrumb-item>权限列表</el-breadcrumb-item>
     </el-breadcrumb>
+    <!-- 卡片布局 -->
     <el-card class="box-card">
       <el-table :data="allPermissionData" style="width: 100%" border stripe>
         <el-table-column type="index" label="#"> </el-table-column>
@@ -32,6 +34,7 @@ export default {
     };
   },
   methods: {
+    // 获取后台权限列表数据
     async getAllPermission(type) {
       let { data: res } = await http.getAllPermission(type);
       console.log("allPremission:", res);

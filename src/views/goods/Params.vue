@@ -1,17 +1,21 @@
 <template>
   <div class="params">
+    <!-- 面包屑导航 -->
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item>商品管理</el-breadcrumb-item>
       <el-breadcrumb-item>参数列表</el-breadcrumb-item>
     </el-breadcrumb>
+    <!-- 卡片布局 -->
     <el-card>
+      <!-- 提示 -->
       <el-alert title="注意：只允许为第三级分类设置相关参数！" type="warning" show-icon> </el-alert>
       <p>
         <span class="choose_type">选择商品分类:</span>
         <el-cascader class="type_cascader" v-model="selKeys" :options="goodsTypeList" :props="cascaderProps" @change="handleChange"></el-cascader>
       </p>
       <el-tabs v-model="activeName" @tab-click="tabChangeClick">
+        <!-- 动态参数面板 -->
         <el-tab-pane label="动态参数" name="many">
           <el-button type="primary" size="mini" :disabled="!isDisabled" @click="addDialogVisible = true">添加参数</el-button>
           <el-table :data="paramsList" border stripe>
@@ -41,6 +45,7 @@
             </el-table-column>
           </el-table>
         </el-tab-pane>
+        <!-- 静态参数面板 -->
         <el-tab-pane label="静态参数" name="only">
           <el-button type="primary" size="mini" :disabled="!isDisabled" @click="addDialogVisible = true">添加属性</el-button>
           <el-table :data="paramsList" border stripe>
@@ -72,6 +77,7 @@
         </el-tab-pane>
       </el-tabs>
     </el-card>
+    <!-- 弹窗 -->
     <el-dialog :title="'添加' + addParamTxt" :visible.sync="addDialogVisible" width="40%" @close="closeAddParamsDialog">
       <el-form ref="addParamsFormRef" :model="addParamsForm" :rules="addParamsFormRules" label-width="80px">
         <el-form-item :label="addParamTxt" prop="params">
@@ -130,12 +136,16 @@ export default {
     };
   },
   computed: {
+    // 控制添加参数/添加属性按钮的禁用与启用
     isDisabled() {
       return this.selKeys.length === 3;
     },
+
+    // 选中的分类id
     typeId() {
       return this.selKeys.length === 3 ? this.selKeys[2] : null;
     },
+    // 添加参数/属性按钮文本
     addParamTxt() {
       if (this.activeName === "many") {
         return "动态参数";
@@ -145,12 +155,14 @@ export default {
     }
   },
   methods: {
+    // 获取类型
     async getGoodsTypeList() {
       const { data: res } = await http.getGoodsTypeList({ type: 3 });
       console.log("goodsTypeList:", res);
       if (res.meta.status !== 200) return this.$message.error(res.meta.msg);
       this.goodsTypeList = res.data;
     },
+    // 获取参数/属性列表
     async getParamsList(sel) {
       const { data: res } = await http.getParamsList(this.selKeys[this.selKeys.length - 1], sel);
       console.log("getParamsList:", res);
@@ -181,12 +193,14 @@ export default {
       console.log(value);
       this.getParams();
     },
+    // 添加new tag按钮与input输入框切换
     showInput(row) {
       row.inputVisible = true;
       this.$nextTick(() => {
         this.$refs.saveTagInput.$refs.input.focus();
       });
     },
+    // 添加new tag input输入框失去焦点时的事件处理
     async handleInputConfirm(row) {
       console.log("row:", row);
       let inputValue = row.inputValue;
@@ -203,6 +217,7 @@ export default {
       });
       console.log("addParams:", res);
     },
+    // 确认添加参数
     async confirmAddParams() {
       this.addDialogVisible = false;
       const { data: res } = await http.addParam(this.typeId, { attr_name: this.addParamsForm.params, attr_sel: this.activeName });
@@ -211,9 +226,11 @@ export default {
       this.$message.success("添加成功");
       this.getParams();
     },
+    // 关闭添加参数弹出框时事件处理
     closeAddParamsDialog() {
       this.$refs.addParamsFormRef.resetFields();
     },
+    // 显示编辑弹出框
     async showEditDialog(id) {
       this.editDialogVisible = true;
       const { data: res } = await http.queryParam(this.typeId, id, { attr_sel: this.activeName });
@@ -221,6 +238,7 @@ export default {
       if (res.meta.status !== 200) return this.$message.error(res.meta.msg);
       this.editParamsForm = res.data;
     },
+    // 确认编辑参数
     async confirmEditParams() {
       const { data: res } = await http.editParam(this.typeId, this.editParamsForm.attr_id, {
         attr_name: this.editParamsForm.attr_name,
@@ -232,6 +250,7 @@ export default {
       this.$message.success("修改成功");
       this.getParams();
     },
+    // 移除参数/属性
     async removeParams(id) {
       const confirmTxt = await this.$confirm("此操作将永久删除该项, 是否继续?", "提示", {
         confirmButtonText: "确定",
@@ -248,6 +267,7 @@ export default {
         this.getParams();
       }
     },
+    // 关闭编辑参数弹出框时事件处理
     closeEditParamsDialog() {
       this.$refs.editParamsFormRef.resetFields();
     }
