@@ -1,4 +1,6 @@
 import axios from "axios";
+import NProgress from "nprogress";
+// import "nprogress/nprogress.css";
 
 const service = axios.create({
   baseURL: "http://127.0.0.1:8888/api/private/v1/",
@@ -9,6 +11,8 @@ const service = axios.create({
 service.interceptors.request.use(
   function(config) {
     // 在发送请求之前做些什么
+    NProgress.start();
+
     const token = window.sessionStorage.getItem("token");
     if (token) config.headers.Authorization = token;
     return config;
@@ -18,6 +22,12 @@ service.interceptors.request.use(
     return Promise.reject(error);
   }
 );
+
+//添加响应拦截器
+service.interceptors.response.use(function(config) {
+  NProgress.done();
+  return config;
+});
 
 let http = {
   /**

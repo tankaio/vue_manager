@@ -3,7 +3,7 @@
     <el-container>
       <el-header>
         <div class="left-box">
-          <img src="../assets/img/sheyingji.png" alt="商城后台管理系统" />
+          <img src="../assets/img/logo_sheyingji.png" alt="商城后台管理系统" />
           <span>商城后台管理系统</span>
         </div>
         <el-button type="info" size="midium" @click="logout">退出</el-button>
